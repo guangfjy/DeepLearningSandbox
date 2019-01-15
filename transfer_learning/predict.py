@@ -54,9 +54,11 @@ def plot_preds(image, preds):
 
 if __name__=="__main__":
   a = argparse.ArgumentParser()
-  a.add_argument("--image", help="path to image")
+  #a.add_argument("--image", help="path to image", default=r"F:\DL\data\overlap\validate\Background\196(9).jpg")
+  a.add_argument("--image", help="path to image", default=r"F:\DL\data\overlap\validate\Exudate\212(73).jpg")
+  
   a.add_argument("--image_url", help="url to image")
-  a.add_argument("--model")
+  a.add_argument("--model", default=r"C:\Users\gaohang\Desktop\DeepLearningSandbox-master\transfer_learning\inceptionv3-ft.model")
   args = a.parse_args()
 
   if args.image is None and args.image_url is None:
