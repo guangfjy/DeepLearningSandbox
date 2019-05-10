@@ -77,7 +77,7 @@ def make_prediction(dir_path, model_path, result_path):
 
             # plt.imsave(os.path.join(result_path, label, "{}_{}_".format(label, "%.3f" % predict_result) + file), img)
             # plt.imsave(os.path.join(result_path, "{}\\{}_{}{}".format(label, name, "%.3f" % predict_result, ext)), img)
-            img.save(os.path.join(result_path, "{}\\{}_{}{}".format(label, name, "%.3f" % predict_result, ext)))
+            img.save(os.path.join(result_path, "{}\\{}_{}{}".format(label, "%.3f" % predict_result, name, ext)))
 
 
 def plot_preds(image, preds):
@@ -104,9 +104,9 @@ if __name__ == "__main__":
     # a.add_argument("--image", help="path to image", default=r"F:\DL\data\overlap\validate\Background\196(9).jpg")
     a.add_argument("--image", help="path to image", default=r"F:\DL\data\cord\test1\56.jpg")
     a.add_argument("--image_url", help="url to image")
-    a.add_argument("--test_folder", help="path to test folder", default="F:\\DL\\data\\cord\\test1\\")
-    a.add_argument("--result_folder", help="path to result folder", default="F:\\DL\\data\\cord\\result\\")
-    a.add_argument("--model", default=r"C:\Users\gaohang\Desktop\DeepLearningSandbox\transfer_learning\inceptionv3-ft.model")
+    a.add_argument("--test_folder", help="path to test folder", default=r"F:\DL\data\cord\catordog\test\\")
+    a.add_argument("--result_folder", help="path to result folder", default=r"F:\DL\data\cord\catordog\test-result\\")
+    a.add_argument("--model", default=r"F:\DL\data\cord\catordog\model\saved_models_229_229\InceptionV3_FT_01_0.98.hdf5")
     args = a.parse_args()
 
     if args.image is None and args.image_url is None:

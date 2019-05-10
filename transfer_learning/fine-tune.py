@@ -12,7 +12,10 @@ from keras.layers import Dense, GlobalAveragePooling2D
 from keras.preprocessing.image import ImageDataGenerator
 from keras.optimizers import SGD
 
+from keras.callbacks import ModelCheckpoint
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ["KMP_AFFINITY"] = "granularity=fine,compact,1,0"
 
 
 IM_WIDTH, IM_HEIGHT = 229, 229  # fixed size for InceptionV3
@@ -82,7 +85,7 @@ def train(args):
     batch_size = int(args.batch_size)
 
     # data prep
-    train_datagen =  ImageDataGenerator(
+    train_datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
         rotation_range=30,
         width_shift_range=0.2,
@@ -120,25 +123,36 @@ def train(args):
     # transfer learning
     setup_to_transfer_learn(model, base_model)
 
+    # 模型的保存目录
+    save_dir = os.path.join(args.output_model_dir, 'saved_models_' + str(IM_WIDTH) + '_' + str(IM_HEIGHT))
+    if os.path.exists(save_dir) is False:
+        os.makedirs(save_dir)
+    filepath = "InceptionV3_TL_{epoch:02d}_{val_acc:.2f}.hdf5"
+    checkpoint = ModelCheckpoint(os.path.join(save_dir, filepath), monitor='val_acc', verbose=1, save_best_only=True)
     history_tl = model.fit_generator(
         train_generator,
         epochs=nb_epoch,
         steps_per_epoch=nb_train_samples // batch_size,
         validation_data=validation_generator,
         validation_steps=nb_val_samples // batch_size,
-        class_weight='auto')
+        class_weight='auto',
+        callbacks=[checkpoint])
 
     # fine-tuning
     setup_to_finetune(model)
 
+    filepath = "InceptionV3_FT_{epoch:02d}_{val_acc:.2f}.hdf5"
+    checkpoint = ModelCheckpoint(os.path.join(save_dir, filepath), monitor='val_acc', verbose=1, save_best_only=True)
     history_ft = model.fit_generator(
         train_generator,
         steps_per_epoch=nb_train_samples // batch_size,
         epochs=nb_epoch,
         validation_data=validation_generator,
         validation_steps=nb_val_samples // batch_size,
-        class_weight='auto')
+        class_weight='auto',
+        callbacks=[checkpoint])
 
+    # 最终模型的保存
     model.save(args.output_model_file)
 
     if args.plot:
@@ -165,11 +179,12 @@ def plot_training(history):
 
 if __name__ == "__main__":
     a = argparse.ArgumentParser()
-    a.add_argument("--train_dir", default=r"F:\DL\data\cord\train_dir")
-    a.add_argument("--val_dir", default=r"F:\DL\data\cord\val_dir")
+    a.add_argument("--train_dir", default=r"F:\DL\data\cord\catordog\train")
+    a.add_argument("--val_dir", default=r"F:\DL\data\cord\catordog\validate")
+    a.add_argument("--output_model_dir", default=r"F:\DL\data\cord\catordog\model")
     a.add_argument("--nb_epoch", default=NB_EPOCHS)
     a.add_argument("--batch_size", default=BAT_SIZE)
-    a.add_argument("--output_model_file", default="inceptionv3-ft.model")
+    a.add_argument("--output_model_file", default="inceptionv3-ft-catordog.model")
     a.add_argument("--plot", action="store_true", default=True)
 
     args = a.parse_args()
